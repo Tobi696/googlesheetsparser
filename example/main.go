@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	googlesheetsparser "github.com/Tobi696/google-sheets-parser"
+	"github.com/Tobi696/googlesheetsparser"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
@@ -69,7 +69,7 @@ func main() {
 	srv := getService()
 
 	// Acutal usage of the Library
-	users, err := googlesheetsparser.ParsePageIntoStructSlice[User](googlesheetsparser.Options{
+	users, err := googlesheetsparser.ParseSheetIntoStructSlice[User](googlesheetsparser.Options{
 		Service:       srv,
 		SpreadsheetID: "15PTbwnLdGJXb4kgLVVBtZ7HbK3QEj-olOxsY7XTzvCc",
 		DatetimeFormats: []string{

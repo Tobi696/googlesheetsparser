@@ -49,7 +49,7 @@ func (o Options) Build() Options {
 }
 
 // ParseSheet parses a sheet page and returns a slice of structs with the give type.
-func ParsePageIntoStructSlice[K any](options Options) ([]K, error) {
+func ParseSheetIntoStructSlice[K any](options Options) ([]K, error) {
 	if !options.built {
 		log.Println("googlesheetsparser: Warning: Using options that are not built")
 	}

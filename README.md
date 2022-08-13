@@ -32,7 +32,7 @@ type User struct {
 
 
 // Acutal usage of the Library
-users, err := googlesheetsparser.ParsePageIntoStructSlice[User](googlesheetsparser.Options{
+users, err := googlesheetsparser.ParseSheetIntoStructSlice[User](googlesheetsparser.Options{
     Service:       srv, // <- Google Sheets Service (*sheets.Service)
     SpreadsheetID: "15PTbwnLdGJXb4kgLVVBtZ7HbK3QEj-olOxsY7XTzvCc",
     // SheetName: "app-user", <- Optional, by default the library will pluralize the struct name provided as generic, e.g. User -> Users
