@@ -18,9 +18,7 @@ type User struct {
 	ID        uint
 	Username  string
 	Name      string
-	Email     string
 	Password  *string
-	Locale    string
 	Weight    *uint
 	CreatedAt *time.Time `sheets:"Created At"`
 }
@@ -33,6 +31,9 @@ type jwtConfig struct {
 	Scopes       []string `json:"scopes"`
 }
 
+// getService returns a Google Sheets API service
+// using the credentials in "credentials.json"
+// this code works for Service Accounts only
 func getService() *sheets.Service {
 	// Authenticating, creating the googlesheets Service
 	var fileConf jwtConfig
@@ -81,6 +82,6 @@ func main() {
 		log.Fatalf("Unable to parse page: %v", err)
 	}
 
-	fmt.Println(users, err)
-	fmt.Println(*users[0].Weight)
+	// Do anything you want with the users
+	fmt.Println(users)
 }
