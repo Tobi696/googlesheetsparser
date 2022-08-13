@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "Debug Example",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "./example"
+        }
+    ]
+}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	googlesheetsparser "github.com/Tobi696/google-sheets-parser"
 	"golang.org/x/oauth2/jwt"
@@ -14,12 +15,14 @@ import (
 )
 
 type User struct {
-	ID       uint
-	Username string
-	Name     string
-	Email    string
-	Password string
-	Locale   string
+	ID        uint
+	Username  string
+	Name      string
+	Email     string
+	Password  *string
+	Locale    string
+	Height    *uint
+	CreatedAt *time.Time `sheets:"Created At"`
 }
 
 type jwtConfig struct {
@@ -59,10 +62,18 @@ func main() {
 	}
 
 	// Acutal usage of the Library
-	googlesheetsparser.Service = srv
-
-	googlesheetsparser.SpreadSheetID = "15PTbwnLdGJXb4kgLVVBtZ7HbK3QEj-olOxsY7XTzvCc"
-
-	users, err := googlesheetsparser.ParsePageIntoStructSlice[User](nil)
+	users, err := googlesheetsparser.ParsePageIntoStructSlice[User](googlesheetsparser.Options{
+		Service:       srv,
+		SpreadsheetID: "15PTbwnLdGJXb4kgLVVBtZ7HbK3QEj-olOxsY7XTzvCc",
+		DatetimeFormats: []string{
+			"2.1.2006",
+			"02.01.2006",
+			"02.01.2006 15:04:05",
+		},
+	}.Build())
+	if err != nil {
+		log.Fatalf("Unable to parse page: %v", err)
+	}
 	fmt.Println(users, err)
+	fmt.Println(*users[0].Height)
 }
