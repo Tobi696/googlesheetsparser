@@ -21,7 +21,7 @@ type User struct {
 	Email     string
 	Password  *string
 	Locale    string
-	Height    *uint
+	Weight    *uint
 	CreatedAt *time.Time `sheets:"Created At"`
 }
 
@@ -33,7 +33,7 @@ type jwtConfig struct {
 	Scopes       []string `json:"scopes"`
 }
 
-func main() {
+func getService() *sheets.Service {
 	// Authenticating, creating the googlesheets Service
 	var fileConf jwtConfig
 	confFile, err := os.Open("credentials.json")
@@ -61,6 +61,12 @@ func main() {
 		log.Fatalf("Unable to retrieve Sheets client: %v", err)
 	}
 
+	return srv
+}
+
+func main() {
+	srv := getService()
+
 	// Acutal usage of the Library
 	users, err := googlesheetsparser.ParsePageIntoStructSlice[User](googlesheetsparser.Options{
 		Service:       srv,
@@ -74,6 +80,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to parse page: %v", err)
 	}
+
 	fmt.Println(users, err)
-	fmt.Println(*users[0].Height)
+	fmt.Println(*users[0].Weight)
 }
