@@ -2,20 +2,59 @@ package googlesheetsparser
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 
+	"github.com/gertd/go-pluralize"
 	"google.golang.org/api/sheets/v4"
 )
 
 var Service *sheets.Service
+var SpreadSheetID string
 
-func ParsePageIntoStructSlice[K any](spreadsheetId, sheetName string) ([]K, error) {
-	resp, err := Service.Spreadsheets.Values.Get(spreadsheetId, sheetName).Do()
+var pluralizeClient = pluralize.NewClient()
+
+var (
+	ErrNoSpreadSheetID       = errors.New("no spreadsheet id provided")
+	ErrNoSheetName           = errors.New("no sheet name provided")
+	ErrUnsupportedType       = errors.New("u‚nsupported type")
+	ErrFieldNotFoundInStruct = errors.New("field not found in struct")
+)
+
+type Options struct {
+	SpreadSheetID string
+	SheetName     string
+}
+
+// ParseSheet parses a sheet page and returns a slice of structs with the give type.
+func ParsePageIntoStructSlice[K any](options *Options) ([]K, error) {
+	// Set Params
+	var k K
+	spreadSheetId := SpreadSheetID
+	sheetName := pluralizeClient.Plural(reflect.TypeOf(k).Name())
+	if options != nil {
+		if options.SpreadSheetID != "" {
+			spreadSheetId = options.SpreadSheetID
+		}
+		if options.SheetName != "" {
+			sheetName = options.SheetName
+		}
+	}
+
+	// Validate Params
+	if spreadSheetId == "" {
+		return nil, ErrNoSpreadSheetID
+	}
+	if sheetName == "" {
+		return nil, ErrNoSheetName
+	}
+
+	resp, err := Service.Spreadsheets.Values.Get(spreadSheetId, sheetName).Do()
 	if err != nil {
 		return nil, err
 	}
-	mappings, err := CreateMappings[K](resp)
+	mappings, err := createMappings[K](resp)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +63,7 @@ func ParsePageIntoStructSlice[K any](spreadsheetId, sheetName string) ([]K, erro
 		var k K
 		for i := range mappings {
 			field := mappings[i]
-			val, err := ReflectParseString(field.Type, row[i].(string))
+			val, err := reflectParseString(field.Type, row[i].(string))
 			if err != nil {
 				return nil, err
 			}
@@ -35,7 +74,7 @@ func ParsePageIntoStructSlice[K any](spreadsheetId, sheetName string) ([]K, erro
 	return result, nil
 }
 
-func ReflectParseString(reflectType reflect.Type, cell string) (reflect.Value, error) {
+func reflectParseString(reflectType reflect.Type, cell string) (reflect.Value, error) {
 	switch reflectType.Kind() {
 	case reflect.String:
 		return reflect.ValueOf(cell), nil
@@ -118,19 +157,19 @@ func ReflectParseString(reflectType reflect.Type, cell string) (reflect.Value, e
 		}
 		return reflect.ValueOf(i), nil
 	}
-	return reflect.ValueOf(nil), errors.New("Unsupported type: " + reflectType.Kind().String())
+	return reflect.ValueOf(nil), fmt.Errorf("%w: %s", ErrUnsupportedType, reflectType.Kind().String())
 }
 
-func CreateMappings[K any](data *sheets.ValueRange) (mappings []reflect.StructField, err error) {
+func createMappings[K any](data *sheets.ValueRange) (mappings []reflect.StructField, err error) {
 	firstRow := data.Values[0]
 	for _, cellIf := range firstRow {
 		cell := cellIf.(string)
 		if cell == "" {
 			break
 		}
-		field := ReflectGetFieldByTagOrName[K](cell)
+		field := reflectGetFieldByTagOrName[K](cell)
 		if field == nil {
-			err = errors.New("Field not found in struct: " + cell)
+			err = fmt.Errorf("%w: %s", ErrFieldNotFoundInStruct, cell)
 			return
 		}
 		mappings = append(mappings, *field)
@@ -138,7 +177,7 @@ func CreateMappings[K any](data *sheets.ValueRange) (mappings []reflect.StructFi
 	return
 }
 
-func ReflectGetFieldByTagOrName[K any](name string) *reflect.StructField {
+func reflectGetFieldByTagOrName[K any](name string) *reflect.StructField {
 	var k K
 	typeOfK := reflect.TypeOf(k)
 	for i := 0; i < typeOfK.NumField(); i++ {

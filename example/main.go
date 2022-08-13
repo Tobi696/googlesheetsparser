@@ -31,6 +31,7 @@ type jwtConfig struct {
 }
 
 func main() {
+	// Authenticating, creating the googlesheets Service
 	var fileConf jwtConfig
 	confFile, err := os.Open("credentials.json")
 	if err != nil {
@@ -57,8 +58,11 @@ func main() {
 		log.Fatalf("Unable to retrieve Sheets client: %v", err)
 	}
 
+	// Acutal usage of the Library
 	googlesheetsparser.Service = srv
 
-	users, err := googlesheetsparser.ParsePageIntoStructSlice[User]("15PTbwnLdGJXb4kgLVVBtZ7HbK3QEj-olOxsY7XTzvCc", "Users")
+	googlesheetsparser.SpreadSheetID = "15PTbwnLdGJXb4kgLVVBtZ7HbK3QEj-olOxsY7XTzvCc"
+
+	users, err := googlesheetsparser.ParsePageIntoStructSlice[User](nil)
 	fmt.Println(users, err)
 }
