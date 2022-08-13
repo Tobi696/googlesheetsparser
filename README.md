@@ -68,7 +68,7 @@ To try out the example yourself, check out the [example/](emaple/)-Directory.
 This library is intended to be used as a library for parsing Google Sheets into Golang structs. It is not intended to be used as a library for generating Google Sheets from Golang structs.  
 
 The initial need that this library was created for is for seeding a database with data from a Google Sheets.  
-That's very useful because often people who don't have the knowledge to work directly on Databases want to seed their Applications (Mobile/Desktop or whatever) with data. With this library, these people can enter their seed data into a Google sheet and the Developer seed the Database with the structs that the library parsed for him.
+That's very useful because often people who don't have the knowledge to work directly on Databases want to seed their Applications (Mobile/Desktop or whatever) with data. With this library, these people can enter their seed data into a Google sheet and the Developer only has to seed the Database with the structs that the library parsed for him.
 
 
 ## Future
