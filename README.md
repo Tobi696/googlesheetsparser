@@ -20,6 +20,7 @@ The Image shows the sheet called "Users" which is contained int the example spre
 To Parse it, we would utilize following code:
 
 ```go
+// Define your structs to be parsed
 type User struct {
 	ID        uint // <- By default, columns will be parsed into the equally named struct fields.
 	Username  string
