@@ -5,7 +5,7 @@ googlesheetsparser is a library for dynamically parsing Google Sheets into Golan
 ## Installation
 
 ```bash
-go get github.com/Tobi696/google-sheets-parser
+go get github.com/Tobi696/googlesheetsparser
 ```
 
 ### Requirements
