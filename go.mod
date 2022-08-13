@@ -1,4 +1,4 @@
-module github.com/Tobi696/google-sheets-parser
+module github.com/Tobi696/googlesheetsparser
 
 go 1.18
 
