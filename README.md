@@ -60,7 +60,7 @@ Please refer to the [Google Sheets Go Quickstart](https://developers.google.com/
 
 ### Example
 
-To try out the example yourself, check out the [example/](emaple/)-Directory.
+To try out the example yourself, check out the [example/](example/)-Directory.
 
 
 ## Intention
