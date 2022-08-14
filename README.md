@@ -85,8 +85,4 @@ Contributions are welcome! Please open an issue or pull request if you have any 
 
 # Support the development by donating.
 
-[
-  ![Donate with PayPal]
-  (https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png)
-]
-(https://www.paypal.com/donate/?hosted_button_id=D2W5Z6K3G8TPJ)
+[![Donate with PayPal](https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png)](https://www.paypal.com/donate/?hosted_button_id=D2W5Z6K3G8TPJ)
