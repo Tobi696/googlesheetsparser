@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/Tobi696/googlesheetsparser"
 	"golang.org/x/oauth2/jwt"
@@ -14,13 +13,18 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
-type User struct {
-	ID        uint
-	Username  string
-	Name      string
-	Password  *string
-	Weight    *uint
-	CreatedAt *time.Time `sheets:"Created At"`
+type Workout struct {
+	ID             uint
+	NameLine1      string
+	NameLine2      *string
+	ImagePath      string
+	Description    string
+	Difficulty     uint
+	Combustion     float64
+	CombustionUnit string
+	IsFree         bool
+
+	CategoryID uint
 }
 
 type jwtConfig struct {
@@ -69,7 +73,7 @@ func main() {
 	srv := getService()
 
 	// Acutal usage of the Library
-	users, err := googlesheetsparser.ParseSheetIntoStructSlice[User](googlesheetsparser.Options{
+	users, err := googlesheetsparser.ParseSheetIntoStructSlice[Workout](googlesheetsparser.Options{
 		Service:       srv,
 		SpreadsheetID: "15PTbwnLdGJXb4kgLVVBtZ7HbK3QEj-olOxsY7XTzvCc",
 		DatetimeFormats: []string{

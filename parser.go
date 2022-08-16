@@ -257,6 +257,7 @@ func reflectParseString(pReflectType reflect.Type, cell string, dateTimeFormats 
 		if isPointer {
 			return reflect.ValueOf(&i), nil
 		}
+		return reflect.ValueOf(i), nil
 	case reflect.Struct:
 		if reflectType.String() == "time.Time" {
 			for _, dateTimeFormat := range dateTimeFormats {
