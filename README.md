@@ -15,7 +15,7 @@ This library requires Go >= 1.18 as generics are used.
 ## Usage
 
 ![Example Sheet](Users_Sheet.png)
-The Image shows the sheet called "Users" which is contained int the example spreadsheet.  
+The Image shows the sheet called "Users" which is contained in the example spreadsheet.  
 
 To Parse it, we would utilize following code:
 
