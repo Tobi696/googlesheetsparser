@@ -6,6 +6,7 @@ import (
 	"log"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gertd/go-pluralize"
@@ -83,11 +84,11 @@ func ParseSheetIntoStructSlice[K any](options Options) ([]K, error) {
 	fillEmptyValues(resp)
 
 	var result []K
-	for _, row := range resp.Values[1:] {
+	for rowIdx, row := range resp.Values[1:] {
 		var k K
 		for i := range mappings {
 			field := mappings[i]
-			val, err := reflectParseString(field.Type, row[i].(string), options.DatetimeFormats)
+			val, err := reflectParseString(field.Type, row[i].(string), options.DatetimeFormats, rowIdx, i)
 			if err != nil {
 				return nil, err
 			}
@@ -113,7 +114,7 @@ func fillEmptyValues(data *sheets.ValueRange) {
 	}
 }
 
-func reflectParseString(pReflectType reflect.Type, cell string, dateTimeFormats []string) (reflect.Value, error) {
+func reflectParseString(pReflectType reflect.Type, cell string, dateTimeFormats []string, rowIdx, colIdx int) (reflect.Value, error) {
 	reflectType := pReflectType
 	var isPointer bool
 	isEmpty := cell == ""
@@ -269,22 +270,22 @@ func reflectParseString(pReflectType reflect.Type, cell string, dateTimeFormats 
 					return reflect.ValueOf(t), nil
 				}
 			}
-			return reflect.ValueOf(time.Time{}), fmt.Errorf("%w: %s", ErrInvalidDateTimeFormat, cell)
+			return reflect.ValueOf(time.Time{}), fmt.Errorf("%w: %s%d: %s", ErrInvalidDateTimeFormat, getColumnName(colIdx), rowIdx, cell)
 		}
 	}
-	return reflect.ValueOf(nil), fmt.Errorf("%w: %s", ErrUnsupportedType, reflectType.Kind().String())
+	return reflect.ValueOf(nil), fmt.Errorf("%w: %s%d: %s", ErrUnsupportedType, getColumnName(colIdx), rowIdx, reflectType.Kind().String())
 }
 
 func createMappings[K any](data *sheets.ValueRange) (mappings []reflect.StructField, err error) {
 	firstRow := data.Values[0]
-	for _, cellIf := range firstRow {
+	for colIdx, cellIf := range firstRow {
 		cell := cellIf.(string)
 		if cell == "" {
 			break
 		}
 		field := reflectGetFieldByTagOrName[K](cell)
 		if field == nil {
-			err = fmt.Errorf("%w: %s", ErrFieldNotFoundInStruct, cell)
+			err = fmt.Errorf("%w: %s%d: %s", ErrFieldNotFoundInStruct, getColumnName(colIdx), 1, cell)
 			return
 		}
 		mappings = append(mappings, *field)
@@ -305,4 +306,15 @@ func reflectGetFieldByTagOrName[K any](name string) *reflect.StructField {
 		return &field
 	}
 	return nil
+}
+
+func getColumnName(index int) string {
+	index += 1
+	var res string
+	for index > 0 {
+		index--
+		res = string(rune(index%26+97)) + res
+		index /= 26
+	}
+	return strings.ToUpper(res)
 }
