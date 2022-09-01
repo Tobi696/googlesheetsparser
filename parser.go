@@ -90,7 +90,7 @@ func ParseSheetIntoStructSlice[K any](options Options) ([]K, error) {
 			field := mappings[i]
 			val, err := reflectParseString(field.Type, row[i].(string), options.DatetimeFormats, rowIdx, i)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("%s: %s%d: %w", options.SheetName, getColumnName(i), rowIdx, err)
 			}
 			reflect.ValueOf(&k).Elem().FieldByName(field.Name).Set(val)
 		}
@@ -273,7 +273,7 @@ func reflectParseString(pReflectType reflect.Type, cell string, dateTimeFormats 
 			return reflect.ValueOf(time.Time{}), fmt.Errorf("%w: %s%d: %s", ErrInvalidDateTimeFormat, getColumnName(colIdx), rowIdx, cell)
 		}
 	}
-	return reflect.ValueOf(nil), fmt.Errorf("%w: %s%d: %s", ErrUnsupportedType, getColumnName(colIdx), rowIdx, reflectType.Kind().String())
+	return reflect.ValueOf(nil), fmt.Errorf("%w: %s", ErrUnsupportedType, reflectType.Kind().String())
 }
 
 func createMappings[K any](data *sheets.ValueRange) (mappings []reflect.StructField, err error) {
