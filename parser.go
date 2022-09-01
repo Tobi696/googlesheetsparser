@@ -90,7 +90,7 @@ func ParseSheetIntoStructSlice[K any](options Options) ([]K, error) {
 			field := mappings[i]
 			val, err := reflectParseString(field.Type, row[i].(string), options.DatetimeFormats, rowIdx, i)
 			if err != nil {
-				return nil, fmt.Errorf("%s: %s%d: %w", options.SheetName, getColumnName(i), rowIdx, err)
+				return nil, fmt.Errorf("%s: %s%d: %w", sheetName, getColumnName(i), rowIdx, err)
 			}
 			reflect.ValueOf(&k).Elem().FieldByName(field.Name).Set(val)
 		}
