@@ -49,8 +49,8 @@ func (o Options) Build() Options {
 	return o
 }
 
-// ParseSheet parses a sheet page and returns a slice of structs with the give type.
-func ParseSheetIntoStructSlice[K any](options Options) ([]K, error) {
+// ParseSheetIntoStructCb parses a sheet page and calls the callback for each object.
+func ParseSheetIntoStructCb[K any](options Options, cb func(K)) (err error) {
 	if !options.built {
 		log.Println("googlesheetsparser: Warning: Using options that are not built")
 	}
@@ -65,38 +65,46 @@ func ParseSheetIntoStructSlice[K any](options Options) ([]K, error) {
 
 	// Validate Params
 	if spreadSheetId == "" {
-		return nil, ErrNoSpreadSheetID
+		return ErrNoSpreadSheetID
 	}
 	if sheetName == "" {
-		return nil, ErrNoSheetName
+		return ErrNoSheetName
 	}
 
 	resp, err := options.Service.Spreadsheets.Values.Get(spreadSheetId, sheetName).Do()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	mappings, err := createMappings[K](resp)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	fillEmptyValues(resp)
 
-	var result []K
 	for rowIdx, row := range resp.Values[1:] {
 		var k K
 		for i := range mappings {
 			field := mappings[i]
 			val, err := reflectParseString(field.Type, row[i].(string), options.DatetimeFormats, rowIdx, i)
 			if err != nil {
-				return nil, fmt.Errorf("%s: %s%d: %w", sheetName, getColumnName(i), rowIdx+2, err)
+				return fmt.Errorf("%s: %s%d: %w", sheetName, getColumnName(i), rowIdx+2, err)
 			}
 			reflect.ValueOf(&k).Elem().FieldByName(field.Name).Set(val)
 		}
-		result = append(result, k)
+		cb(k)
 	}
-	return result, nil
+	return nil
+}
+
+// ParseSheetIntoStructSlice parses a sheet page and returns a slice of structs with the give type.
+func ParseSheetIntoStructSlice[K any](options Options) ([]K, error) {
+	var res []K
+	err := ParseSheetIntoStructCb(options, func(k K) {
+		res = append(res, k)
+	})
+	return res, err
 }
 
 func fillEmptyValues(data *sheets.ValueRange) {
